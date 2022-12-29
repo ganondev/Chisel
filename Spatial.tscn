@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Puzzle.cs" type="Script" id=1]
+
+[node name="Spatial" type="Spatial"]
+
+[node name="Puzzle" type="StaticBody" parent="."]
+script = ExtResource( 1 )
+
+[node name="Camera" type="Camera" parent="."]
+transform = Transform( 0.888068, 0.0770141, -0.453215, 0.0263357, 0.975726, 0.217408, 0.458957, -0.205009, 0.864483, -2.45322, 0.74993, 4.61818 )
