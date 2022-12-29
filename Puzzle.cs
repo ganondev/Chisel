@@ -13,10 +13,16 @@ public class Puzzle : StaticBody
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
+		
+		Input.MouseMode = Input.MouseModeEnum.Captured;
 
 		data[Vector3.Zero] = true;
 		data[Vector3.Up] = true;
-		data[Vector3.Down + Vector3.Down] = true;
+		data[Vector3.Down] = true;
+		data[Vector3.Left] = true;
+		data[Vector3.Right] = true;
+		data[Vector3.Forward] = true;
+		data[Vector3.Back] = true;
 
 		// var thread = new Thread();
 		// thread.Start(this, "")
@@ -41,7 +47,7 @@ public class Puzzle : StaticBody
 
 		foreach (var pair in data)
 		{
-			_draw_block_mesh(surfaceTool, pair.Key, pair.Value);
+			_draw_block_mesh(surfaceTool, pair.Key - Vector3.One * 0.5f, pair.Value);
 		}
 
 		// # Create the chunk's mesh from the SurfaceTool data.
@@ -154,9 +160,11 @@ public class Puzzle : StaticBody
 
 	static Array calculate_block_uvs(bool val) {
 // # This method only supports square texture sheets.
-		const int blockId = 1;
-		var row = 0; //blockId / TEXTURE_SHEET_WIDTH;
-		var col = 0; // blockId % TEXTURE_SHEET_WIDTH;
+		// const int blockId = 1;
+		var r = new Random();
+		var blockId = r.Next(1, 10);
+		var row = blockId / TEXTURE_SHEET_WIDTH;
+		var col = blockId % TEXTURE_SHEET_WIDTH;
 
 		return new Array(
 			TEXTURE_TILE_SIZE * new Vector2(col, row),
@@ -180,9 +188,37 @@ public class Puzzle : StaticBody
 		);
 	}
 
-//  // Called every frame. 'delta' is the elapsed time since the previous frame.
-//  public override void _Process(float delta)
-//  {
-//      
-//  }
+	// Called every frame. 'delta' is the elapsed time since the previous frame.
+	public override void _Process(float delta)
+	{
+
+		if (Input.IsActionJustPressed("ui_cancel"))
+			Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Captured
+				? Input.MouseModeEnum.Visible
+				: Input.MouseModeEnum.Captured;
+
+		// var newTransform = Transform;
+		// newTransform.basis = new Basis(new Vector3(0, mouseMotion.x * -.001f, 0));
+		//
+		// Transform = newTransform;
+		// Transform.
+
+		// Transform = Transform.Rotated(Vector3.Up, );
+		var angle = ((2 * Mathf.Pi) / 1000) * mouseMotion.x;
+		RotateY(angle);
+		GD.Print("Rotated by ", angle);
+		mouseMotion *= 0.9f;
+
+	}
+
+	private Vector2 mouseMotion = Vector2.Zero;
+	
+	public override void _Input(InputEvent e) {
+		if (e is InputEventMouseMotion motion && Input.MouseMode == Input.MouseModeEnum.Captured)
+		{
+			mouseMotion = motion.Relative;
+			// GD.Print(mouseMotion);
+		}
+	}
+	
 }
