@@ -192,22 +192,19 @@ public class Puzzle : StaticBody
 	public override void _Process(float delta)
 	{
 
-		if (Input.IsActionJustPressed("ui_cancel"))
-			Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Captured
-				? Input.MouseModeEnum.Visible
-				: Input.MouseModeEnum.Captured;
-
-		// var newTransform = Transform;
-		// newTransform.basis = new Basis(new Vector3(0, mouseMotion.x * -.001f, 0));
-		//
-		// Transform = newTransform;
-		// Transform.
-
-		// Transform = Transform.Rotated(Vector3.Up, );
-		var angle = ((2 * Mathf.Pi) / 1000) * mouseMotion.x;
-		RotateY(angle);
-		GD.Print("Rotated by ", angle);
-		mouseMotion *= 0.9f;
+		/* TODO for later
+		 * if (Input.IsActionJustPressed("ui_cancel"))
+		 *	Input.MouseMode = Input.MouseMode == Input.MouseModeEnum.Captured
+		 *		? Input.MouseModeEnum.Visible
+		 *		: Input.MouseModeEnum.Captured;
+		 *
+		 * var angle = ((2 * Mathf.Pi) / 1000) * mouseMotion.x;
+		 * RotateY(angle);
+		 * GD.Print("Rotated by ", angle);
+		 * mouseMotion *= 0.9f;
+		 */
+		
+		
 
 	}
 
