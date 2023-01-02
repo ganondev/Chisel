@@ -1,19 +1,70 @@
 using Godot;
 using System;
 using System.Collections.Specialized;
-using System.Linq;
+using System.Linq;using System.Security.Cryptography;
 using Chisel;
 using Godot.Collections;
 using NumSharp;
 using Array = Godot.Collections.Array;
+using ManagedDict = System.Collections.Generic.Dictionary<Godot.Vector2, (int, HintGrouping)>;
+
+enum HintGrouping : int
+{
+	One,
+	Two,
+	ThreePlus,
+}
 
 public class PuzzleSolver : StaticBody
 {
-	private const int TextureSheetWidth = 8;
-	private const float TextureTileSize = (float)(1.0 / TextureSheetWidth) - 0.01f;
+	private const int TextureSheetWidth = 10;
+	private const float TextureTileSize = (float)(1.0 / TextureSheetWidth);
 		
 	private NDArray _data;
-	private readonly Godot.Collections.Dictionary<Vector3, bool> hints;
+	private readonly ManagedDict xHints = 
+		new ManagedDict{
+			
+		};
+	private readonly ManagedDict yHints =
+		new ManagedDict {
+			{new Vector2(0, 0) , (0, HintGrouping.One)},
+			{new Vector2(9, 0) , (0, HintGrouping.One)},
+			{new Vector2(0, 9) , (0, HintGrouping.One)},
+			{new Vector2(9, 9) , (0, HintGrouping.One)},
+		};
+	private readonly ManagedDict zHints =
+		new ManagedDict {
+			{new Vector2(0, 0) , (0, HintGrouping.One)},
+			{new Vector2(1, 0) , (1, HintGrouping.One)},
+			{new Vector2(2, 0) , (2, HintGrouping.One)},
+			{new Vector2(3, 0) , (3, HintGrouping.One)},
+			{new Vector2(4, 0) , (4, HintGrouping.One)},
+			{new Vector2(5, 0) , (5, HintGrouping.One)},
+			{new Vector2(6, 0) , (6, HintGrouping.One)},
+			{new Vector2(7, 0) , (7, HintGrouping.One)},
+			{new Vector2(8, 0) , (8, HintGrouping.One)},
+			{new Vector2(9, 0) , (9, HintGrouping.One)},
+			{new Vector2(0, 1) , (0, HintGrouping.Two)},
+			{new Vector2(1, 1) , (1, HintGrouping.Two)},
+			{new Vector2(2, 1) , (2, HintGrouping.Two)},
+			{new Vector2(3, 1) , (3, HintGrouping.Two)},
+			{new Vector2(4, 1) , (4, HintGrouping.Two)},
+			{new Vector2(5, 1) , (5, HintGrouping.Two)},
+			{new Vector2(6, 1) , (6, HintGrouping.Two)},
+			{new Vector2(7, 1) , (7, HintGrouping.Two)},
+			{new Vector2(8, 1) , (8, HintGrouping.Two)},
+			{new Vector2(9, 1) , (9, HintGrouping.Two)},
+			{new Vector2(0, 2) , (0, HintGrouping.ThreePlus)},
+			{new Vector2(1, 2) , (1, HintGrouping.ThreePlus)},
+			{new Vector2(2, 2) , (2, HintGrouping.ThreePlus)},
+			{new Vector2(3, 2) , (3, HintGrouping.ThreePlus)},
+			{new Vector2(4, 2) , (4, HintGrouping.ThreePlus)},
+			{new Vector2(5, 2) , (5, HintGrouping.ThreePlus)},
+			{new Vector2(6, 2) , (6, HintGrouping.ThreePlus)},
+			{new Vector2(7, 2) , (7, HintGrouping.ThreePlus)},
+			{new Vector2(8, 2) , (8, HintGrouping.ThreePlus)},
+			{new Vector2(9, 2) , (9, HintGrouping.ThreePlus)},
+		};
 	private Vector2 _mouseMotion = Vector2.Zero;
 
 	#region Godot Object overrides
@@ -111,11 +162,28 @@ public class PuzzleSolver : StaticBody
 		);
 	}
 	
-	private static Array CalculateBlockUvs(bool val) {
-		var r = new Random();
-		var blockId = r.Next(1, 10);
-		var row = blockId / TextureSheetWidth;
-		var col = blockId % TextureSheetWidth;
+	private static Array CalculateBlockUvs(ManagedDict hints, Vector2 position)
+	{
+		position += new Vector2(5, 5);
+		int tile;
+		if (hints.TryGetValue(position, out var pair))
+		{
+			var face = pair.Item1;
+			var grouping = (int)pair.Item2;
+			tile = grouping * 2 * 10 + face;
+		}
+		else
+		{
+			tile = 60;
+		}
+
+		if (new Random().Next(2) == 0)
+		{
+			tile += 10;
+		}
+
+		int row = tile / TextureSheetWidth;
+		int col = tile % TextureSheetWidth;
 
 		return new Array(
 			TextureTileSize * new Vector2(col, row),
@@ -169,38 +237,30 @@ public class PuzzleSolver : StaticBody
 	
 	private void DrawBlockMesh(SurfaceTool surfaceTool, Vector3 blockSubPosition, bool value)
 	{
-		
+
 		var verts = CalculateBlockVerts(blockSubPosition);
-		var uvs = CalculateBlockUvs(value);
 
-		// // # Allow some blocks to have different top/bottom textures.
-		// 		if block_id == 3: # Grass.top_uvs = CalculateBlockUvs(0)
-		// 		bottom_uvs = CalculateBlockUvs(2)
-		// 		elif block_id == 5: # Furnace.top_uvs = CalculateBlockUvs(31)
-		// 		bottom_uvs = top_uvs
-		// 		elif block_id == 12: # Log.top_uvs = CalculateBlockUvs(30)
-		// 		bottom_uvs = top_uvs
-		// 		elif block_id == 19: # Bookshelf.top_uvs = CalculateBlockUvs(4)
-		// 		bottom_uvs = top_uvs
-
+		var xUvs = CalculateBlockUvs(xHints, new Vector2(blockSubPosition.z, blockSubPosition.y));
+		var yUvs = CalculateBlockUvs(yHints, new Vector2(blockSubPosition.x, blockSubPosition.z));
+		var zUvs = CalculateBlockUvs(zHints, new Vector2(blockSubPosition.x, blockSubPosition.y));
 
 		if (!IsFullCell(blockSubPosition + Vector3.Left))
-			DrawBlockFace(surfaceTool, new Array(verts[2], verts[0], verts[3], verts[1]), uvs);
+			DrawBlockFace(surfaceTool, new Array(verts[2], verts[0], verts[3], verts[1]), xUvs);
 		
 		if (!IsFullCell(blockSubPosition + Vector3.Right))
-			DrawBlockFace(surfaceTool, new Array(verts[7], verts[5], verts[6], verts[4]), uvs);
+			DrawBlockFace(surfaceTool, new Array(verts[7], verts[5], verts[6], verts[4]), xUvs);
 		
 		if (!IsFullCell(blockSubPosition + Vector3.Forward))
-			DrawBlockFace(surfaceTool, new Array(verts[6], verts[4], verts[2], verts[0]), uvs);
+			DrawBlockFace(surfaceTool, new Array(verts[6], verts[4], verts[2], verts[0]), zUvs);
 		
 		if (!IsFullCell(blockSubPosition + Vector3.Back))
-			DrawBlockFace(surfaceTool, new Array(verts[3], verts[1], verts[7], verts[5]), uvs);
+			DrawBlockFace(surfaceTool, new Array(verts[3], verts[1], verts[7], verts[5]), zUvs);
 		
 		if (!IsFullCell(blockSubPosition + Vector3.Down))
-			DrawBlockFace(surfaceTool, new Array(verts[4], verts[5], verts[0], verts[1]), uvs);
+			DrawBlockFace(surfaceTool, new Array(verts[4], verts[5], verts[0], verts[1]), yUvs);
 		
 		if (!IsFullCell(blockSubPosition + Vector3.Up))
-			DrawBlockFace(surfaceTool, new Array(verts[2], verts[3], verts[6], verts[7]), uvs);
+			DrawBlockFace(surfaceTool, new Array(verts[2], verts[3], verts[6], verts[7]), yUvs);
 	}
 	
 	#endregion
