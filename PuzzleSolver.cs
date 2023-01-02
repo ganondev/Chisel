@@ -23,47 +23,255 @@ public class PuzzleSolver : StaticBody
 	private NDArray _data;
 	private readonly ManagedDict xHints = 
 		new ManagedDict{
+			{new Vector2(0, 0) , (1, HintGrouping.One)},
+			{new Vector2(1, 0) , (4, HintGrouping.Two)},
+			{new Vector2(2, 0) , (4, HintGrouping.Two)},
+			{new Vector2(3, 0) , (2, HintGrouping.Two)},
+			{new Vector2(5, 0) , (2, HintGrouping.Two)},
+			{new Vector2(6, 0) , (1, HintGrouping.One)},
+			{new Vector2(7, 0) , (3, HintGrouping.ThreePlus)},
+			{new Vector2(8, 0) , (5, HintGrouping.Two)},
+			{new Vector2(9, 0) , (1, HintGrouping.One)},
+			
+			{new Vector2(1, 1) , (7, HintGrouping.One)},
+			{new Vector2(2, 1) , (4, HintGrouping.Two)},
+			{new Vector2(3, 1) , (3, HintGrouping.Two)},
+			{new Vector2(6, 1) , (2, HintGrouping.One)},
+			{new Vector2(7, 1) , (0, HintGrouping.One)},
+			{new Vector2(8, 1) , (2, HintGrouping.One)},
+			{new Vector2(9, 1) , (0, HintGrouping.One)},
+			
+			{new Vector2(0, 2) , (6, HintGrouping.One)},
+			{new Vector2(1, 2) , (9, HintGrouping.Two)},
+			{new Vector2(4, 2) , (4, HintGrouping.One)},
+			{new Vector2(8, 2) , (1, HintGrouping.One)},
+			
+			{new Vector2(0, 3) , (4, HintGrouping.One)},
+			{new Vector2(6, 3) , (4, HintGrouping.One)},
+			{new Vector2(7, 3) , (4, HintGrouping.One)},
+			{new Vector2(8, 3) , (3, HintGrouping.One)},
+
+			{new Vector2(1, 4) , (2, HintGrouping.Two)},
+			{new Vector2(2, 4) , (1, HintGrouping.One)},
+			{new Vector2(3, 4) , (3, HintGrouping.One)},
+			{new Vector2(4, 4) , (3, HintGrouping.One)},
+			{new Vector2(5, 4) , (6, HintGrouping.Two)},
+			{new Vector2(7, 4) , (6, HintGrouping.Two)},
+			{new Vector2(8, 4) , (2, HintGrouping.One)},
+			{new Vector2(9, 4) , (0, HintGrouping.One)},
+			
+			{new Vector2(1, 5) , (0, HintGrouping.One)},
+			{new Vector2(2, 5) , (0, HintGrouping.One)},
+			{new Vector2(3, 5) , (0, HintGrouping.One)},
+			{new Vector2(5, 5) , (3, HintGrouping.Two)},
+			{new Vector2(6, 5) , (7, HintGrouping.Two)},
+			{new Vector2(7, 5) , (4, HintGrouping.Two)},
+			{new Vector2(9, 5) , (1, HintGrouping.One)},
+			
+			{new Vector2(0, 6) , (1, HintGrouping.One)},
+			{new Vector2(1, 6) , (1, HintGrouping.One)},
+			{new Vector2(2, 6) , (1, HintGrouping.One)},
+			{new Vector2(3, 6) , (1, HintGrouping.One)},
+			{new Vector2(4, 6) , (1, HintGrouping.One)},
+			{new Vector2(6, 6) , (7, HintGrouping.One)},
+			{new Vector2(7, 6) , (7, HintGrouping.ThreePlus)},
+			{new Vector2(8, 6) , (1, HintGrouping.One)},
+			{new Vector2(9, 6) , (2, HintGrouping.One)},
+			
+			{new Vector2(2, 7) , (1, HintGrouping.One)},
+			{new Vector2(4, 7) , (2, HintGrouping.Two)},
+			{new Vector2(5, 7) , (6, HintGrouping.One)},
+			{new Vector2(7, 7) , (7, HintGrouping.Two)},
+			{new Vector2(8, 7) , (2, HintGrouping.Two)},
+			{new Vector2(9, 7) , (2, HintGrouping.Two)},
+			
+			{new Vector2(0, 8) , (0, HintGrouping.One)},
+			{new Vector2(1, 8) , (1, HintGrouping.One)},
+			{new Vector2(2, 8) , (1, HintGrouping.One)},
+			{new Vector2(3, 8) , (3, HintGrouping.Two)},
+			{new Vector2(4, 8) , (0, HintGrouping.One)},
+			{new Vector2(6, 8) , (4, HintGrouping.One)},
+			{new Vector2(7, 8) , (3, HintGrouping.Two)},
+			{new Vector2(8, 8) , (1, HintGrouping.One)},
+			{new Vector2(9, 8) , (3, HintGrouping.Two)},
+
+			{new Vector2(1, 9) , (0, HintGrouping.One)},
+			{new Vector2(2, 9) , (1, HintGrouping.One)},
+			{new Vector2(4, 9) , (0, HintGrouping.One)},
+			{new Vector2(6, 9) , (0, HintGrouping.One)},
+			{new Vector2(8, 9) , (1, HintGrouping.One)},
+			{new Vector2(9, 9) , (0, HintGrouping.One)},
 			
 		};
 	private readonly ManagedDict yHints =
 		new ManagedDict {
-			{new Vector2(0, 0) , (0, HintGrouping.One)},
-			{new Vector2(9, 0) , (0, HintGrouping.One)},
-			{new Vector2(0, 9) , (0, HintGrouping.One)},
-			{new Vector2(9, 9) , (0, HintGrouping.One)},
+			
+			{new Vector2(1, 9) , (0, HintGrouping.One)},
+			{new Vector2(4, 9) , (1, HintGrouping.One)},
+			{new Vector2(5, 9) , (2, HintGrouping.One)},
+
+			{new Vector2(0, 8) , (0, HintGrouping.One)},
+			{new Vector2(1, 8) , (1, HintGrouping.One)},
+			{new Vector2(2, 8) , (1, HintGrouping.One)},
+			{new Vector2(4, 8) , (1, HintGrouping.One)},
+			{new Vector2(5, 8) , (0, HintGrouping.One)},
+			{new Vector2(7, 8) , (3, HintGrouping.Two)},
+			{new Vector2(9, 8) , (8, HintGrouping.Two)},
+
+			{new Vector2(1, 7) , (2, HintGrouping.Two)},
+			{new Vector2(3, 7) , (5, HintGrouping.Two)},
+			{new Vector2(5, 7) , (3, HintGrouping.Two)},
+			{new Vector2(6, 7) , (4, HintGrouping.ThreePlus)},
+			{new Vector2(8, 7) , (5, HintGrouping.Two)},
+			{new Vector2(9, 7) , (6, HintGrouping.Two)},
+
+			{new Vector2(0, 6) , (2, HintGrouping.Two)},
+			{new Vector2(1, 6) , (3, HintGrouping.Two)},
+			{new Vector2(3, 6) , (4, HintGrouping.One)},
+			{new Vector2(4, 6) , (3, HintGrouping.One)},
+			{new Vector2(6, 6) , (6, HintGrouping.One)},
+			{new Vector2(7, 6) , (7, HintGrouping.One)},
+			{new Vector2(8, 6) , (6, HintGrouping.One)},
+			{new Vector2(9, 6) , (6, HintGrouping.One)},
+			
+			{new Vector2(0, 5) , (3, HintGrouping.Two)},
+			{new Vector2(1, 5) , (2, HintGrouping.Two)},
+			{new Vector2(2, 5) , (3, HintGrouping.Two)},
+			{new Vector2(3, 5) , (4, HintGrouping.One)},
+			{new Vector2(4, 5) , (4, HintGrouping.One)},
+			{new Vector2(5, 5) , (4, HintGrouping.ThreePlus)},
+			{new Vector2(6, 5) , (4, HintGrouping.ThreePlus)},
+			{new Vector2(7, 5) , (5, HintGrouping.One)},
+			{new Vector2(8, 5) , (4, HintGrouping.One)},
+			{new Vector2(9, 5) , (4, HintGrouping.One)},
+
+			{new Vector2(0, 4) , (1, HintGrouping.One)},
+			{new Vector2(1, 4) , (0, HintGrouping.One)},
+			{new Vector2(2, 4) , (0, HintGrouping.One)},
+			{new Vector2(4, 4) , (2, HintGrouping.Two)},
+			{new Vector2(5, 4) , (2, HintGrouping.One)},
+			{new Vector2(7, 4) , (7, HintGrouping.One)},
+			{new Vector2(8, 4) , (5, HintGrouping.One)},
+			{new Vector2(9, 4) , (4, HintGrouping.One)},
+
+			{new Vector2(1, 3) , (0, HintGrouping.One)},
+			{new Vector2(3, 3) , (1, HintGrouping.One)},
+			{new Vector2(4, 3) , (1, HintGrouping.One)},
+			{new Vector2(5, 3) , (3, HintGrouping.Two)},
+			{new Vector2(6, 3) , (0, HintGrouping.One)},
+			{new Vector2(8, 3) , (7, HintGrouping.Two)},
+
+			{new Vector2(1, 2) , (0, HintGrouping.One)},
+			{new Vector2(2, 2) , (2, HintGrouping.One)},
+			{new Vector2(4, 2) , (3, HintGrouping.One)},
+			{new Vector2(6, 2) , (2, HintGrouping.One)},
+			{new Vector2(8, 2) , (3, HintGrouping.One)},
+			{new Vector2(9, 2) , (7, HintGrouping.Two)},
+
+			{new Vector2(1, 1) , (1, HintGrouping.One)},
+			{new Vector2(2, 1) , (2, HintGrouping.One)},
+			{new Vector2(4, 1) , (3, HintGrouping.One)},
+			{new Vector2(5, 1) , (4, HintGrouping.One)},
+			{new Vector2(7, 1) , (5, HintGrouping.One)},
+			{new Vector2(9, 1) , (5, HintGrouping.Two)},
+			
+			{new Vector2(1, 0) , (0, HintGrouping.One)},
+			{new Vector2(3, 0) , (2, HintGrouping.One)},
+			{new Vector2(4, 0) , (2, HintGrouping.One)},
+			{new Vector2(5, 0) , (3, HintGrouping.One)},
+			{new Vector2(6, 0) , (3, HintGrouping.One)},
+			{new Vector2(7, 0) , (4, HintGrouping.One)},
+			{new Vector2(8, 0) , (2, HintGrouping.One)},
+			{new Vector2(9, 0) , (2, HintGrouping.One)},
+
 		};
 	private readonly ManagedDict zHints =
 		new ManagedDict {
-			{new Vector2(0, 0) , (0, HintGrouping.One)},
+			
+			{new Vector2(0, 0) , (3, HintGrouping.One)},
 			{new Vector2(1, 0) , (1, HintGrouping.One)},
-			{new Vector2(2, 0) , (2, HintGrouping.One)},
-			{new Vector2(3, 0) , (3, HintGrouping.One)},
-			{new Vector2(4, 0) , (4, HintGrouping.One)},
-			{new Vector2(5, 0) , (5, HintGrouping.One)},
-			{new Vector2(6, 0) , (6, HintGrouping.One)},
-			{new Vector2(7, 0) , (7, HintGrouping.One)},
-			{new Vector2(8, 0) , (8, HintGrouping.One)},
-			{new Vector2(9, 0) , (9, HintGrouping.One)},
-			{new Vector2(0, 1) , (0, HintGrouping.Two)},
-			{new Vector2(1, 1) , (1, HintGrouping.Two)},
-			{new Vector2(2, 1) , (2, HintGrouping.Two)},
-			{new Vector2(3, 1) , (3, HintGrouping.Two)},
-			{new Vector2(4, 1) , (4, HintGrouping.Two)},
-			{new Vector2(5, 1) , (5, HintGrouping.Two)},
-			{new Vector2(6, 1) , (6, HintGrouping.Two)},
-			{new Vector2(7, 1) , (7, HintGrouping.Two)},
-			{new Vector2(8, 1) , (8, HintGrouping.Two)},
-			{new Vector2(9, 1) , (9, HintGrouping.Two)},
-			{new Vector2(0, 2) , (0, HintGrouping.ThreePlus)},
-			{new Vector2(1, 2) , (1, HintGrouping.ThreePlus)},
-			{new Vector2(2, 2) , (2, HintGrouping.ThreePlus)},
-			{new Vector2(3, 2) , (3, HintGrouping.ThreePlus)},
-			{new Vector2(4, 2) , (4, HintGrouping.ThreePlus)},
-			{new Vector2(5, 2) , (5, HintGrouping.ThreePlus)},
-			{new Vector2(6, 2) , (6, HintGrouping.ThreePlus)},
-			{new Vector2(7, 2) , (7, HintGrouping.ThreePlus)},
-			{new Vector2(8, 2) , (8, HintGrouping.ThreePlus)},
-			{new Vector2(9, 2) , (9, HintGrouping.ThreePlus)},
+			{new Vector2(3, 0) , (4, HintGrouping.Two)},
+			{new Vector2(4, 0) , (2, HintGrouping.Two)},
+			{new Vector2(6, 0) , (2, HintGrouping.Two)},
+			{new Vector2(7, 0) , (4, HintGrouping.Two)},
+			{new Vector2(8, 0) , (4, HintGrouping.Two)},
+			
+			{new Vector2(0, 1) , (2, HintGrouping.One)},
+			{new Vector2(1, 1) , (1, HintGrouping.One)},
+			{new Vector2(2, 1) , (3, HintGrouping.One)},
+			{new Vector2(3, 1) , (3, HintGrouping.One)},
+			{new Vector2(4, 1) , (3, HintGrouping.One)},
+			{new Vector2(6, 1) , (3, HintGrouping.Two)},
+			{new Vector2(9, 1) , (5, HintGrouping.Two)},
+			
+			{new Vector2(0, 2) , (2, HintGrouping.One)},
+			{new Vector2(2, 2) , (1, HintGrouping.One)},
+			{new Vector2(3, 2) , (3, HintGrouping.One)},
+			{new Vector2(4, 2) , (3, HintGrouping.One)},
+			{new Vector2(5, 2) , (3, HintGrouping.One)},
+			{new Vector2(6, 2) , (5, HintGrouping.ThreePlus)},
+			{new Vector2(7, 2) , (8, HintGrouping.One)},
+			{new Vector2(8, 2) , (8, HintGrouping.One)},
+			{new Vector2(9, 2) , (8, HintGrouping.One)},
+			
+			{new Vector2(0, 3) , (0, HintGrouping.One)},
+			{new Vector2(2, 3) , (0, HintGrouping.One)},
+			{new Vector2(3, 3) , (0, HintGrouping.One)},
+			{new Vector2(5, 3) , (3, HintGrouping.One)},
+			{new Vector2(6, 3) , (6, HintGrouping.Two)},
+			{new Vector2(7, 3) , (9, HintGrouping.One)},
+			{new Vector2(8, 3) , (9, HintGrouping.One)},
+			{new Vector2(9, 3) , (8, HintGrouping.One)},
+
+			{new Vector2(0, 4) , (0, HintGrouping.One)},
+			{new Vector2(1, 4) , (3, HintGrouping.One)},
+			{new Vector2(2, 4) , (3, HintGrouping.One)},
+			{new Vector2(5, 4) , (1, HintGrouping.One)},
+			{new Vector2(6, 4) , (3, HintGrouping.One)},
+			{new Vector2(7, 4) , (7, HintGrouping.Two)},
+
+			{new Vector2(0, 5) , (0, HintGrouping.One)},
+			{new Vector2(2, 5) , (3, HintGrouping.One)},
+			{new Vector2(3, 5) , (3, HintGrouping.One)},
+			{new Vector2(5, 5) , (1, HintGrouping.One)},
+			{new Vector2(6, 5) , (1, HintGrouping.One)},
+			{new Vector2(7, 5) , (5, HintGrouping.Two)},
+			{new Vector2(8, 5) , (3, HintGrouping.Two)},
+			{new Vector2(9, 5) , (2, HintGrouping.Two)},
+			
+			{new Vector2(0, 6) , (2, HintGrouping.Two)},
+			{new Vector2(3, 6) , (3, HintGrouping.One)},
+			{new Vector2(4, 6) , (3, HintGrouping.One)},
+			{new Vector2(5, 6) , (3, HintGrouping.One)},
+			{new Vector2(6, 6) , (3, HintGrouping.One)},
+			{new Vector2(7, 6) , (5, HintGrouping.Two)},
+			{new Vector2(8, 6) , (3, HintGrouping.ThreePlus)},
+			{new Vector2(9, 6) , (6, HintGrouping.Two)},
+
+			{new Vector2(0, 7) , (3, HintGrouping.One)},
+			{new Vector2(1, 7) , (3, HintGrouping.One)},
+			{new Vector2(2, 7) , (3, HintGrouping.One)},
+			{new Vector2(3, 7) , (3, HintGrouping.One)},
+			{new Vector2(5, 7) , (5, HintGrouping.ThreePlus)},
+			{new Vector2(6, 7) , (1, HintGrouping.One)},
+			{new Vector2(7, 7) , (2, HintGrouping.Two)},
+			{new Vector2(8, 7) , (2, HintGrouping.Two)},
+			{new Vector2(9, 7) , (5, HintGrouping.Two)},
+			
+			{new Vector2(2, 8) , (1, HintGrouping.One)},
+			{new Vector2(3, 8) , (3, HintGrouping.One)},
+			{new Vector2(4, 8) , (5, HintGrouping.ThreePlus)},
+			{new Vector2(8, 8) , (2, HintGrouping.Two)},
+			
+			{new Vector2(0, 9) , (0, HintGrouping.One)},
+			{new Vector2(2, 9) , (0, HintGrouping.One)},
+			{new Vector2(3, 9) , (0, HintGrouping.One)},
+			{new Vector2(4, 9) , (2, HintGrouping.Two)},
+			{new Vector2(6, 9) , (2, HintGrouping.Two)},
+			{new Vector2(7, 9) , (0, HintGrouping.One)},
+			{new Vector2(8, 9) , (0, HintGrouping.One)},
+			{new Vector2(9, 9) , (2, HintGrouping.Two)},
+
 		};
 	private Vector2 _mouseMotion = Vector2.Zero;
 
@@ -179,7 +387,7 @@ public class PuzzleSolver : StaticBody
 
 		if (new Random().Next(2) == 0)
 		{
-			tile += 10;
+			// tile += 10;
 		}
 
 		int row = tile / TextureSheetWidth;
@@ -294,4 +502,15 @@ public class PuzzleSolver : StaticBody
 	
 	#endregion
 
+	void Regenerate()
+	{
+		foreach (Node c in GetChildren())
+		{
+			RemoveChild(c);
+			c.QueueFree();
+		}
+		GenerateChunkMesh();
+		//GenerateChunkCollider
+	}
+	
 }
