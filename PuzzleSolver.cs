@@ -275,6 +275,31 @@ public class PuzzleSolver : StaticBody
 		};
 	private Vector2 _mouseMotion = Vector2.Zero;
 
+	private int cull = 0;
+	// false is x, true is z
+	private bool cullDirection = false;
+
+	private NDArray View
+	{
+		get
+		{
+			var x = cullDirection ? ":" : $"{cull}:";
+			var z = cullDirection ? $"{cull}:" : ":";
+			return _data[$"{x},:,{z},:"];
+		}
+		
+	}
+
+	private NDArray Data
+	{
+		get
+		{
+			
+			var subtracted = 1000 - (Mathf.Abs(cull) * 100);
+			return View.reshape(subtracted, 4);
+		}
+	}
+	
 	#region Godot Object overrides
 	
 	// Called when the node enters the scene tree for the first time.
@@ -288,14 +313,12 @@ public class PuzzleSolver : StaticBody
 			{
 				for (int z = 0; z < 10; z++)
 				{
-					_data[x, y, z, 1] = x - 5;
-					_data[x, y, z, 2] = y - 5;
-					_data[x, y, z, 3] = z - 5;
+					_data[x, y, z, 1] = x;
+					_data[x, y, z, 2] = y;
+					_data[x, y, z, 3] = z;
 				}
 			}
 		}
-
-		// Input.MouseMode = Input.MouseModeEnum.Captured;
 
 		// var thread = new Thread();
 		// thread.Start(this, "")
@@ -325,19 +348,28 @@ public class PuzzleSolver : StaticBody
 		{
 			_mouseMotion = motion;
 		});
+		if (Input.IsActionPressed("ui_accept"))
+		{
+			var r = new Random();
+			var x = r.Next(10);
+			var y = r.Next(10);
+			var z = r.Next(10);
+			_data[x, y, z, 0] = 0;
+			Regenerate();
+		}
 	}
 	
 	#endregion
 
 	#region GenerateChunkMesh tree
 	
+	// TODO rename probably
 	private Array<Vector3> GetFilledCells()
 	{
 
-		var result = _data
-			.reshape(1000, 4)
+		var result = Data
 			.GetNDArrays()
-			.Where(a => a[0] == 1)
+			.Where(a => a.GetDouble(0) > 0)
 			.Select(a =>
 			{
 				var cell = a.ToArray<double>().Select(d => (float)d).ToArray();
@@ -357,7 +389,7 @@ public class PuzzleSolver : StaticBody
 	{
 		// TODO is offset when puzzle dimension has odd length
 		// - Vector3.One * 0.5f;
-		var blockPosition = blockSubPosition;
+		var blockPosition = blockSubPosition - Vector3.One * 5;
 		return new Array(
 			new Vector3(blockPosition.x, blockPosition.y, blockPosition.z),
 			new Vector3(blockPosition.x, blockPosition.y, blockPosition.z + 1),
@@ -370,9 +402,8 @@ public class PuzzleSolver : StaticBody
 		);
 	}
 	
-	private static Array CalculateBlockUvs(ManagedDict hints, Vector2 position)
+	private static Array CalculateBlockUvs(ManagedDict hints, Vector2 position, bool isMarked)
 	{
-		position += new Vector2(5, 5);
 		int tile;
 		if (hints.TryGetValue(position, out var pair))
 		{
@@ -385,9 +416,9 @@ public class PuzzleSolver : StaticBody
 			tile = 60;
 		}
 
-		if (new Random().Next(2) == 0)
+		if (isMarked)
 		{
-			// tile += 10;
+			tile += 10;
 		}
 
 		int row = tile / TextureSheetWidth;
@@ -405,23 +436,44 @@ public class PuzzleSolver : StaticBody
 	
 	bool IsOutOfBounds(Vector3 v)
 	{
-		return -5 > v.x || v.x >= 5 || -5 > v.y || v.y >= 5 || -5 > v.z || v.z >= 5;
+		
+		var xCull = cullDirection ? 0 : cull;
+		var zCull = cullDirection ? cull : 0;
+		return xCull > v.x || 0 > v.y || zCull > v.z
+		       || v.x >= 10
+		       || v.y >= 10
+		       || v.z >= 10;
+
 	}
 	
 	private bool IsFullCell(Vector3 location)
 	{
-
+		
 		if (IsOutOfBounds(location)) return false;
 
 		var cell = _data[
-			(int)location.x + 5,
-			(int)location.y + 5,
-			(int)location.z + 5
+			(int)location.x,
+			(int)location.y,
+			(int)location.z
 		];
-		
-		var ret = cell[0] == 1;
-		return ret;
 
+		// Have to use GetDouble because NDArray is typed as double. Any other Get results in an NPE.
+		var cellState = cell.GetDouble(0);
+		return cellState > 0;
+
+	}
+
+	private bool IsMarkedCell(Vector3 location)
+	{
+		var cell = _data[
+			(int)location.x,
+			(int)location.y,
+			(int)location.z
+		];
+
+		// Have to use GetDouble because NDArray is typed as double. Any other Get results in an NPE.
+		var cellState = cell.GetDouble(0);
+		return cellState > 1;
 	}
 	
 	#endregion
@@ -447,10 +499,11 @@ public class PuzzleSolver : StaticBody
 	{
 
 		var verts = CalculateBlockVerts(blockSubPosition);
+		var isMarked = IsMarkedCell(blockSubPosition);
 
-		var xUvs = CalculateBlockUvs(xHints, new Vector2(blockSubPosition.z, blockSubPosition.y));
-		var yUvs = CalculateBlockUvs(yHints, new Vector2(blockSubPosition.x, blockSubPosition.z));
-		var zUvs = CalculateBlockUvs(zHints, new Vector2(blockSubPosition.x, blockSubPosition.y));
+		var xUvs = CalculateBlockUvs(xHints, new Vector2(blockSubPosition.z, blockSubPosition.y), isMarked);
+		var yUvs = CalculateBlockUvs(yHints, new Vector2(blockSubPosition.x, blockSubPosition.z), isMarked);
+		var zUvs = CalculateBlockUvs(zHints, new Vector2(blockSubPosition.x, blockSubPosition.y), isMarked);
 
 		if (!IsFullCell(blockSubPosition + Vector3.Left))
 			DrawBlockFace(surfaceTool, new Array(verts[2], verts[0], verts[3], verts[1]), xUvs);
