@@ -278,6 +278,12 @@ public class PuzzleSolver : StaticBody
 	private int cull = 0;
 	// false is x, true is z
 	private bool cullDirection = false;
+	
+	// solving
+	private int currentRowHighlight = 0;
+	private int scanClock = 0;
+	private int scanCycle = 60;
+	private bool continueScan = false;
 
 	private NDArray View
 	{
@@ -341,6 +347,23 @@ public class PuzzleSolver : StaticBody
 		 
 		 _mouseMotion *= 0.9f;
 
+		 if (continueScan)
+		 {
+			 scanClock = ++scanClock % scanCycle;
+			 if (scanClock == 0)
+			 {
+				 currentRowHighlight = ++currentRowHighlight % 10;
+				 if (currentRowHighlight == 0)
+				 {
+					 cull = ++cull % 10;
+					 if (cull == 0)
+					 {
+						 cullDirection = !cullDirection;
+					 }
+				 } 
+			 }
+		 }
+
 	}
 
 	public override void _Input(InputEvent e) {
@@ -384,7 +407,7 @@ public class PuzzleSolver : StaticBody
 	}
 	
 	#region DrawBlockMesh tree
-	
+
 	private static Array CalculateBlockVerts(Vector3 blockSubPosition)
 	{
 		// TODO is offset when puzzle dimension has odd length
@@ -402,23 +425,28 @@ public class PuzzleSolver : StaticBody
 		);
 	}
 	
-	private static Array CalculateBlockUvs(ManagedDict hints, Vector2 position, bool isMarked)
+	private Array CalculateBlockUvs(ManagedDict hints, Vector2 position, bool isMarked, bool isHighlighted)
 	{
 		int tile;
+
 		if (hints.TryGetValue(position, out var pair))
 		{
 			var face = pair.Item1;
 			var grouping = (int)pair.Item2;
-			tile = grouping * 2 * 10 + face;
+			tile = grouping * 3 * 10 + face;
+
+			if (isHighlighted)
+			{
+				tile += 20;
+			}
+			else if (isMarked)
+			{
+				tile += 10;
+			}
 		}
 		else
 		{
-			tile = 60;
-		}
-
-		if (isMarked)
-		{
-			tile += 10;
+			tile = isHighlighted ? 92 : isMarked ? 91 : 90;
 		}
 
 		int row = tile / TextureSheetWidth;
@@ -463,7 +491,7 @@ public class PuzzleSolver : StaticBody
 
 	}
 
-	private bool IsMarkedCell(Vector3 location)
+	private (bool isMarked, bool isHinted) IsMarkedOrHighlightedCell(Vector3 location)
 	{
 		var cell = _data[
 			(int)location.x,
@@ -473,7 +501,22 @@ public class PuzzleSolver : StaticBody
 
 		// Have to use GetDouble because NDArray is typed as double. Any other Get results in an NPE.
 		var cellState = cell.GetDouble(0);
-		return cellState > 1;
+		var isMarked = cellState > 1;
+
+		bool isHighlighted;
+		
+		// culling z, check x
+		if (cullDirection)
+		{
+			isHighlighted = (int)location.y == currentRowHighlight && (int)location.x == cull;
+		}
+		// culling x, check z
+		else
+		{
+			isHighlighted = (int)location.y == currentRowHighlight && (int)location.z == cull;
+		}
+
+		return (isMarked, isHighlighted);
 	}
 	
 	#endregion
@@ -499,11 +542,11 @@ public class PuzzleSolver : StaticBody
 	{
 
 		var verts = CalculateBlockVerts(blockSubPosition);
-		var isMarked = IsMarkedCell(blockSubPosition);
+		var (isMarked, isHighlighted) = IsMarkedOrHighlightedCell(blockSubPosition);
 
-		var xUvs = CalculateBlockUvs(xHints, new Vector2(blockSubPosition.z, blockSubPosition.y), isMarked);
-		var yUvs = CalculateBlockUvs(yHints, new Vector2(blockSubPosition.x, blockSubPosition.z), isMarked);
-		var zUvs = CalculateBlockUvs(zHints, new Vector2(blockSubPosition.x, blockSubPosition.y), isMarked);
+		var xUvs = CalculateBlockUvs(xHints, new Vector2(blockSubPosition.z, blockSubPosition.y), isMarked, isHighlighted);
+		var yUvs = CalculateBlockUvs(yHints, new Vector2(blockSubPosition.x, blockSubPosition.z), isMarked, isHighlighted);
+		var zUvs = CalculateBlockUvs(zHints, new Vector2(blockSubPosition.x, blockSubPosition.y), isMarked, isHighlighted);
 
 		if (!IsFullCell(blockSubPosition + Vector3.Left))
 			DrawBlockFace(surfaceTool, new Array(verts[2], verts[0], verts[3], verts[1]), xUvs);
