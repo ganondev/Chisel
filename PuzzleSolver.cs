@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections;
 using System.Collections.Specialized;
 using System.Linq;using System.Security.Cryptography;
 using Chisel;
@@ -370,17 +371,27 @@ public class PuzzleSolver : StaticBody
 					 var slice = _data[$"{x},{currentRowHighlight},{z},0"];
 					 var doubles = slice.ToArray<double>();
 					 var row = new Array<int>(from d in doubles select (int)d);
-					 var change = ReduceRow(hint, in row);
+					 if (ReduceRow(hint, in row))
+					 {
+						 continueScan = false;
+						 var newDoubles = from i in row select (double)i;
+						 _data[$"{x},{currentRowHighlight},{z},0"] = newDoubles.ToArray();
+						 Regenerate();
+					 }
 				 }
 			 }
 		 }
-		 
-		 
-
 	}
 
 	private bool ReduceRow((int, HintGrouping) hint, in Array<int> row)
 	{
+		var (face, grouping) = hint;
+		if (face == 0)
+		{
+			for (var i = 0; i < 10; i++)
+				row[i] = 0;
+			return true;
+		}
 		return false;
 	}
  
