@@ -20,3 +20,6 @@ mono_crash.*.json
 .directory
 .DS_Store
 *~
+ECHO is on.
+*.exe  
+*.pck  
