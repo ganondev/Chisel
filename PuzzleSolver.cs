@@ -22,7 +22,7 @@ public class PuzzleSolver : StaticBody
 		
 	private NDArray _data;
 	private readonly ManagedDict xHints = 
-		new ManagedDict{
+		new ManagedDict {
 			{new Vector2(0, 0) , (1, HintGrouping.One)},
 			{new Vector2(1, 0) , (4, HintGrouping.Two)},
 			{new Vector2(2, 0) , (4, HintGrouping.Two)},
@@ -313,11 +313,11 @@ public class PuzzleSolver : StaticBody
 	{
 
 		_data = np.ones(10, 10, 10, 4);
-		for (int x = 0; x < 10; x++)
+		for (var x = 0; x < 10; x++)
 		{
-			for (int y = 0; y < 10; y++)
+			for (var y = 0; y < 10; y++)
 			{
-				for (int z = 0; z < 10; z++)
+				for (var z = 0; z < 10; z++)
 				{
 					_data[x, y, z, 1] = x;
 					_data[x, y, z, 2] = y;
@@ -362,11 +362,28 @@ public class PuzzleSolver : StaticBody
 					 }
 				 } 
 				 Regenerate();
+				 var hintDict = cullDirection ? xHints : zHints;
+				 if (hintDict.TryGetValue(new Vector2(cull, currentRowHighlight), out var hint))
+				 {
+					 var x = cullDirection ? ":" : $"{cull}";
+					 var z = cullDirection ? $"{cull}" : ":";
+					 var slice = _data[$"{x},{currentRowHighlight},{z},0"];
+					 var doubles = slice.ToArray<double>();
+					 var row = new Array<int>(from d in doubles select (int)d);
+					 var change = ReduceRow(hint, in row);
+				 }
 			 }
 		 }
+		 
+		 
 
 	}
 
+	private bool ReduceRow((int, HintGrouping) hint, in Array<int> row)
+	{
+		return false;
+	}
+ 
 	public override void _Input(InputEvent e) {
 		PuzzleInput.OnPuzzleTurn(e, motion =>
 		{
@@ -450,8 +467,8 @@ public class PuzzleSolver : StaticBody
 			tile = isHighlighted ? 92 : isMarked ? 91 : 90;
 		}
 
-		int row = tile / TextureSheetWidth;
-		int col = tile % TextureSheetWidth;
+		var row = tile / TextureSheetWidth;
+		var col = tile % TextureSheetWidth;
 
 		return new Array(
 			TextureTileSize * new Vector2(col, row),
