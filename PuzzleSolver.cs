@@ -282,7 +282,7 @@ public class PuzzleSolver : StaticBody
 	// solving
 	private int currentRowHighlight = 0;
 	private int scanClock = 0;
-	private int scanCycle = 60;
+	private int scanCycle = 15;
 	private bool continueScan = false;
 
 	private NDArray View
@@ -361,25 +361,26 @@ public class PuzzleSolver : StaticBody
 						 cullDirection = !cullDirection;
 					 }
 				 } 
+				 Regenerate();
 			 }
 		 }
 
 	}
 
 	public override void _Input(InputEvent e) {
-		PuzzleInput.OnPuzzleTurn(e, (motion) =>
+		PuzzleInput.OnPuzzleTurn(e, motion =>
 		{
 			_mouseMotion = motion;
 		});
-		if (Input.IsActionPressed("ui_accept"))
-		{
-			var r = new Random();
-			var x = r.Next(10);
-			var y = r.Next(10);
-			var z = r.Next(10);
-			_data[x, y, z, 0] = 0;
-			Regenerate();
-		}
+		
+		if (Input.IsActionJustPressed("ui_accept"))
+			continueScan = !continueScan;
+
+		if (Input.IsActionJustPressed("ui_up"))
+			scanCycle += 5;
+
+		if (Input.IsActionJustPressed("ui_down"))
+			scanCycle = Math.Max(5, scanCycle - 5);
 	}
 	
 	#endregion
@@ -508,12 +509,12 @@ public class PuzzleSolver : StaticBody
 		// culling z, check x
 		if (cullDirection)
 		{
-			isHighlighted = (int)location.y == currentRowHighlight && (int)location.x == cull;
+			isHighlighted = (int)location.y == currentRowHighlight && (int)location.z == cull;
 		}
 		// culling x, check z
 		else
 		{
-			isHighlighted = (int)location.y == currentRowHighlight && (int)location.z == cull;
+			isHighlighted = (int)location.y == currentRowHighlight && (int)location.x == cull;
 		}
 
 		return (isMarked, isHighlighted);
