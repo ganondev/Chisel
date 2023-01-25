@@ -364,7 +364,6 @@ public class PuzzleSolver : StaticBody
 						 cullDirection = !cullDirection;
 					 }
 				 } 
-				 Regenerate();
 				 if (!solvedRows.Contains((cull, currentRowHighlight, cullDirection ? 0 : 1)))
 				 {
 					 var hintDict = cullDirection ? xHints : zHints;
@@ -385,11 +384,10 @@ public class PuzzleSolver : StaticBody
 							 {
 								 solvedRows.Add((cull, currentRowHighlight, cullDirection ? 0 : 1));
 							 }
-
-							 Regenerate();
 						 }
 					 }
 				 }
+				 Regenerate();
 			 }
 		 }
 	}
