@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;using System.Security.Cryptography;
 using Chisel;
@@ -281,6 +282,7 @@ public class PuzzleSolver : StaticBody
 	private bool cullDirection = false;
 	
 	// solving
+	private HashSet<(int, int, int)> solvedRows = new HashSet<(int, int, int)>();
 	private int currentRowHighlight = 0;
 	private int scanClock = 0;
 	private int scanCycle = 15;
@@ -363,20 +365,29 @@ public class PuzzleSolver : StaticBody
 					 }
 				 } 
 				 Regenerate();
-				 var hintDict = cullDirection ? xHints : zHints;
-				 if (hintDict.TryGetValue(new Vector2(cull, currentRowHighlight), out var hint))
+				 if (!solvedRows.Contains((cull, currentRowHighlight, cullDirection ? 0 : 1)))
 				 {
-					 var x = cullDirection ? ":" : $"{cull}";
-					 var z = cullDirection ? $"{cull}" : ":";
-					 var slice = _data[$"{x},{currentRowHighlight},{z},0"];
-					 var doubles = slice.ToArray<double>();
-					 var row = new Array<int>(from d in doubles select (int)d);
-					 if (ReduceRow(hint, in row))
+					 var hintDict = cullDirection ? xHints : zHints;
+					 if (hintDict.TryGetValue(new Vector2(cull, currentRowHighlight), out var hint))
 					 {
-						 continueScan = false;
-						 var newDoubles = from i in row select (double)i;
-						 _data[$"{x},{currentRowHighlight},{z},0"] = newDoubles.ToArray();
-						 Regenerate();
+						 var x = cullDirection ? ":" : $"{cull}";
+						 var z = cullDirection ? $"{cull}" : ":";
+						 var slice = _data[$"{x},{currentRowHighlight},{z},0"];
+						 var doubles = slice.ToArray<double>();
+						 var row = new Array<int>(from d in doubles select (int)d);
+						 if (ReduceRow(hint, in row))
+						 {
+							 continueScan = false;
+							 var newDoubles = from i in row select (double)i;
+							 _data[$"{x},{currentRowHighlight},{z},0"] = newDoubles.ToArray();
+
+							 if (row.Count(i => i > 0) == hint.Item1)
+							 {
+								 solvedRows.Add((cull, currentRowHighlight, cullDirection ? 0 : 1));
+							 }
+
+							 Regenerate();
+						 }
 					 }
 				 }
 			 }
