@@ -17,6 +17,13 @@ enum HintGrouping : int
 	ThreePlus,
 }
 
+internal enum Axis
+{
+	X,
+	Y,
+	Z
+}
+
 public class PuzzleSolver : StaticBody
 {
 	private const int TextureSheetWidth = 10;
@@ -283,7 +290,7 @@ public class PuzzleSolver : StaticBody
 	
 	// solving
 	private HashSet<(int, int, int)> solvedRows = new HashSet<(int, int, int)>();
-	private int currentRowHighlight = 0;
+	private int currentLineHighlight = 0;
 	private int scanClock = 0;
 	private int scanCycle = 15;
 	private bool continueScan = false;
@@ -355,8 +362,8 @@ public class PuzzleSolver : StaticBody
 			 scanClock = ++scanClock % scanCycle;
 			 if (scanClock == 0)
 			 {
-				 currentRowHighlight = ++currentRowHighlight % 10;
-				 if (currentRowHighlight == 0)
+				 currentLineHighlight = ++currentLineHighlight % 10;
+				 if (currentLineHighlight == 0)
 				 {
 					 cull = ++cull % 10;
 					 if (cull == 0)
@@ -364,25 +371,19 @@ public class PuzzleSolver : StaticBody
 						 cullDirection = !cullDirection;
 					 }
 				 } 
-				 if (!solvedRows.Contains((cull, currentRowHighlight, cullDirection ? 0 : 1)))
+				 if (!solvedRows.Contains((cull, currentLineHighlight, cullDirection ? 0 : 1)))
 				 {
 					 var hintDict = cullDirection ? xHints : zHints;
-					 if (hintDict.TryGetValue(new Vector2(cull, currentRowHighlight), out var hint))
+					 if (hintDict.TryGetValue(new Vector2(cull, currentLineHighlight), out var hint))
 					 {
-						 var x = cullDirection ? ":" : $"{cull}";
-						 var z = cullDirection ? $"{cull}" : ":";
-						 var slice = _data[$"{x},{currentRowHighlight},{z},0"];
-						 var doubles = slice.ToArray<double>();
-						 var row = new Array<int>(from d in doubles select (int)d);
+						 var row = GetStripe(cullDirection ? Axis.Z : Axis.X, (cull, currentLineHighlight));
 						 if (ReduceRow(hint, in row))
 						 {
+							 SetStripe(cullDirection ? Axis.Z : Axis.X, (cull, currentLineHighlight), row);
 							 continueScan = false;
-							 var newDoubles = from i in row select (double)i;
-							 _data[$"{x},{currentRowHighlight},{z},0"] = newDoubles.ToArray();
-
 							 if (row.Count(i => i > 0) == hint.Item1)
 							 {
-								 solvedRows.Add((cull, currentRowHighlight, cullDirection ? 0 : 1));
+								 solvedRows.Add((cull, currentLineHighlight, cullDirection ? 0 : 1));
 							 }
 						 }
 					 }
@@ -390,6 +391,42 @@ public class PuzzleSolver : StaticBody
 				 Regenerate();
 			 }
 		 }
+	}
+
+	private static string StripMask(Axis axis, (int, int) coord)
+	{
+		string mask;
+		switch (axis)
+		{
+			case Axis.X:
+				mask = $"{coord.Item1},{coord.Item2},:";
+				break;
+			case Axis.Y:
+				mask = $"{coord.Item2},{coord.Item1},:";
+				break;
+			case Axis.Z:
+			default:
+				mask = $":,{coord.Item2},{coord.Item1}";
+				break;
+		}
+
+		return $"{mask},0";
+	}
+
+	private Array<int> GetStripe(Axis axis, (int, int) coord)
+	{
+
+		var slice = _data[StripMask(axis, coord)];
+		var doubles = slice.ToArray<double>();
+		var row = new Array<int>(from d in doubles select (int)d);
+		return row;
+
+	}
+
+	private void SetStripe(Axis axis, (int, int) coord, Array<int> row)
+	{
+		var newDoubles = from i in row select (double)i;
+		_data[StripMask(axis, coord)] = newDoubles.ToArray();
 	}
 
 	private bool ReduceRow((int, HintGrouping) hint, in Array<int> row)
@@ -546,12 +583,12 @@ public class PuzzleSolver : StaticBody
 		// culling z, check x
 		if (cullDirection)
 		{
-			isHighlighted = (int)location.y == currentRowHighlight && (int)location.z == cull;
+			isHighlighted = (int)location.y == currentLineHighlight && (int)location.z == cull;
 		}
 		// culling x, check z
 		else
 		{
-			isHighlighted = (int)location.y == currentRowHighlight && (int)location.x == cull;
+			isHighlighted = (int)location.y == currentLineHighlight && (int)location.x == cull;
 		}
 
 		return (isMarked, isHighlighted);
