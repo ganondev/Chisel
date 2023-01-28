@@ -597,14 +597,18 @@ public class PuzzleSolver : StaticBody
 		bool isHighlighted;
 		
 		// culling z, check x
-		if (cullDirection)
+		if (axis == Axis.Z)
 		{
 			isHighlighted = (int)location.y == currentLineHighlight && (int)location.z == cull;
 		}
 		// culling x, check z
-		else
+		else if (axis == Axis.X)
 		{
 			isHighlighted = (int)location.y == currentLineHighlight && (int)location.x == cull;
+		}
+		else
+		{
+			isHighlighted = (int)location.z == currentLineHighlight && (int)location.x == cull;
 		}
 
 		return (isMarked, isHighlighted);
