@@ -292,8 +292,10 @@ public class PuzzleSolver : StaticBody
 	private HashSet<(int, int, int)> solvedRows = new HashSet<(int, int, int)>();
 	private int currentLineHighlight = 0;
 	private int scanClock = 0;
-	private int scanCycle = 15;
+	// private int scanCycle = 15;
+	private int scanCycle = 2;
 	private bool continueScan = false;
+	private Axis axis = Axis.X;
 
 	private NDArray View
 	{
@@ -368,22 +370,36 @@ public class PuzzleSolver : StaticBody
 					 cull = ++cull % 10;
 					 if (cull == 0)
 					 {
-						 cullDirection = !cullDirection;
+
+						 axis = (Axis)((int)++axis % 3);
+						 if (axis == Axis.Z)
+						 {
+							 cullDirection = true;
+						 }
+						 else
+						 {
+							 cullDirection = false;
+						 }
+
 					 }
 				 } 
-				 if (!solvedRows.Contains((cull, currentLineHighlight, cullDirection ? 0 : 1)))
+				 if (!solvedRows.Contains((cull, currentLineHighlight, (int)axis)))
 				 {
-					 var hintDict = cullDirection ? xHints : zHints;
+					 var hintDict = axis == Axis.X 
+						 ? zHints 
+						 : axis == Axis.Y 
+							 ? yHints 
+							 : xHints;
 					 if (hintDict.TryGetValue(new Vector2(cull, currentLineHighlight), out var hint))
 					 {
-						 var row = GetStripe(cullDirection ? Axis.Z : Axis.X, (cull, currentLineHighlight));
+						 var row = GetStripe(axis, (cull, currentLineHighlight));
 						 if (ReduceRow(hint, in row))
 						 {
-							 SetStripe(cullDirection ? Axis.Z : Axis.X, (cull, currentLineHighlight), row);
-							 continueScan = false;
+							 SetStripe(axis, (cull, currentLineHighlight), row);
+							 // continueScan = false;
 							 if (row.Count(i => i > 0) == hint.Item1)
 							 {
-								 solvedRows.Add((cull, currentLineHighlight, cullDirection ? 0 : 1));
+								 solvedRows.Add((cull, currentLineHighlight, (int)axis));
 							 }
 						 }
 					 }
@@ -402,7 +418,7 @@ public class PuzzleSolver : StaticBody
 				mask = $"{coord.Item1},{coord.Item2},:";
 				break;
 			case Axis.Y:
-				mask = $"{coord.Item2},{coord.Item1},:";
+				mask = $"{coord.Item1},:,{coord.Item2}";
 				break;
 			case Axis.Z:
 			default:
