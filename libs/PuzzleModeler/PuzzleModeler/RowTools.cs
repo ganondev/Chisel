@@ -23,6 +23,12 @@ public static class RowTools
         }
 
         var rowSize = row.Count(i => i > 0);
+        if (face == rowSize)
+        {
+            // mark any remaining cells
+            updated = from i in row select i == 0 ? 0 : 2;
+            goto done;
+        }
 
         if (grouping == HintGrouping.One)
         {
@@ -43,17 +49,7 @@ public static class RowTools
             }
 			
         }
-
-        if (face == rowSize)
-        {
-            // mark any remaining cells
-            // GD.Print("Row complete");
-            updated = from i in row select i == 0 ? 0 : 2;
-            goto done;
-        }
-		
-        // if ()
-		
+        
         done:
 
         if (updated != null)
