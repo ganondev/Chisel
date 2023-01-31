@@ -8,15 +8,11 @@ using System.Threading;
 using Chisel;
 using Godot.Collections;
 using NumSharp;
+using PuzzleModeler;
 using Array = Godot.Collections.Array;
-using ManagedDict = System.Collections.Generic.Dictionary<Godot.Vector2, (int, HintGrouping)>;
+using ManagedDict = System.Collections.Generic.Dictionary<Godot.Vector2, (int, PuzzleModeler.HintGrouping)>;
 
-enum HintGrouping : int
-{
-	One,
-	Two,
-	ThreePlus,
-}
+
 
 internal enum Axis
 {
@@ -393,10 +389,12 @@ public class PuzzleSolver : StaticBody
 							 : xHints;
 					 if (hintDict.TryGetValue(new Vector2(cull, currentLineHighlight), out var hint))
 					 {
-						 var row = GetStripe(axis, (cull, currentLineHighlight));
-						 if (ReduceRow(hint, ref row))
+						 var temp_row = GetStripe(axis, (cull, currentLineHighlight));
+						 var row = (from i in temp_row select i).ToList();
+						 if (RowTools.ReduceRow(hint, ref row))
 						 {
-							 SetStripe(axis, (cull, currentLineHighlight), row);
+							 temp_row = new Array<int>(row);
+							 SetStripe(axis, (cull, currentLineHighlight), temp_row);
 							 // continueScan = false;
 							 if (row.Count(i => i == 2) == hint.Item1)
 							 {
@@ -446,61 +444,6 @@ public class PuzzleSolver : StaticBody
 		_data[StripMask(axis, coord)] = newDoubles.ToArray();
 	}
 
-	private bool ReduceRow((int, HintGrouping) hint, ref Array<int> row)
-	{
-		
-		var (face, grouping) = hint;
-		IEnumerable<int> updated = null;
-		
-		if (face == 0)
-		{
-			GD.Print("Remove 0");
-			updated = from i in row select 0;
-			goto done;
-		}
-
-		var rowSize = row.Count(i => i > 0);
-
-		if (grouping == HintGrouping.One)
-		{
-
-			if (face > rowSize / 2)
-			{
-				var margins = rowSize - face;
-
-				var segmentSize = rowSize - margins * 2;
-				var segment = row.Skip(margins).Take(segmentSize);
-				if (segment.Any(i => i == 1))
-				{
-					segment = Enumerable.Repeat(2, segmentSize);
-					updated = row.Take(margins).Concat(segment).Concat(row.Skip(margins + segmentSize));
-					goto done;
-				}
-
-			}
-			
-		}
-
-		if (face == rowSize)
-		{
-			// mark any remaining cells
-			GD.Print("Row complete");
-			updated = from i in row select i == 0 ? 0 : 2;
-			goto done;
-		}
-		
-		// if ()
-		
-		done:
-
-		if (updated != null)
-		{
-			row = new Array<int>(updated);
-			return true;
-		}
-		return false;
-	}
- 
 	public override void _Input(InputEvent e) {
 		PuzzleInput.OnPuzzleTurn(e, motion =>
 		{
