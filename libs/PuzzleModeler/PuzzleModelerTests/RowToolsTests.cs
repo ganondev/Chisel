@@ -1,9 +1,26 @@
 using PuzzleModeler;
+using HG = PuzzleModeler.HintGrouping;
 
 namespace PuzzleModelerTests;
 
 public class RowToolsTests
 {
+    private static void ReduceAndAssertLists(List<int> input, int face, HG grouping, List<int> expected)
+    {
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(RowTools.ReduceRow((face, grouping), ref input), Is.True);
+            Assert.That(input, Is.EquivalentTo(expected));
+        });
+        
+    }
+
+    private static List<int> L(params int[] values)
+    {
+        return new List<int>(values);
+    }
+    
     [SetUp]
     public void Setup()
     {
@@ -12,17 +29,14 @@ public class RowToolsTests
     [Test]
     public void TestZeroFaceHintClearsRow()
     {
-        const HintGrouping grouping = HintGrouping.One;
-        const int face = 0;
 
-        var row = Enumerable.Repeat(1, 10).ToList();
-
-        var result = RowTools.ReduceRow((face, grouping), ref row);
-        Assert.Multiple(() =>
-        {
-            Assert.That(result, Is.True);
-            Assert.That(row, Is.EquivalentTo(Enumerable.Repeat(0, 10)));
-        });
+        ReduceAndAssertLists(
+            Enumerable.Repeat(1, 10).ToList(),
+            0,
+            HG.One,
+            Enumerable.Repeat(0, 10).ToList()
+        );
+        
     }
 
     private static IEnumerable<TestCaseData> SingleGroupFullMarkTestCases()
@@ -60,13 +74,52 @@ public class RowToolsTests
     [Test, TestCaseSource(nameof(SingleGroupFullMarkTestCases))]
     public void TestSingleGroupFaceMatchingRowSizeIsFullyMarked(int face, List<int> input, List<int> expected)
     {
-        const HintGrouping grouping = HintGrouping.One;
+        ReduceAndAssertLists(
+            input,
+            face,
+            HG.One,
+            expected
+        );
+    }
 
-        var result = RowTools.ReduceRow((face, grouping), ref input);
-        Assert.Multiple(() =>
-        {
-            Assert.That(result, Is.True);
-            Assert.That(input, Is.EquivalentTo(expected));
-        });
+    // TODO parameterize
+    [Test]
+    public void TestDoubleGroupFaceMatchingRowSizeIsFullyMarked()
+    {
+
+        ReduceAndAssertLists(
+            L( 1, 1, 0, 0, 0, 0, 0, 1, 1, 1 ),
+            5,
+            HG.Two,
+            L( 2, 2, 0, 0, 0, 0, 0, 2, 2, 2 )
+        );
+        
+    }
+
+    // TODO parameterize
+    [Test]
+    public void TestMultipleGroupFaceMatchingRowSizeIsFullyMarked()
+    {
+
+        ReduceAndAssertLists(
+            L( 1, 1, 0, 1, 1, 0, 0, 1, 1, 1 ),
+            7,
+            HG.ThreePlus,
+            L( 2, 2, 0, 2, 2, 0, 0, 2, 2, 2 )
+        );
+        
+    }
+
+    [Test]
+    public void TestFaceGuaranteeingCenterCoverIsMarked()
+    {
+
+        ReduceAndAssertLists(
+            L( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
+            9,
+            HG.One,
+            L( 1, 2, 2, 2, 2, 2, 2, 2, 2, 1 )
+        );
+
     }
 }
