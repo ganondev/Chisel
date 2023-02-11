@@ -111,7 +111,7 @@ public class RowToolsTests
     }
 
     [Test]
-    public void TestFaceGuaranteeingCenterCoverIsMarked()
+    public void TestOddFaceGuaranteeingCenterCoverIsMarkedForFullRowOfEvenSize()
     {
 
         ReduceAndAssertLists(
@@ -122,4 +122,51 @@ public class RowToolsTests
         );
 
     }
+    
+    [Test]
+    public void TestEvenFaceGuaranteeingCenterCoverIsMarkedForFullRowOfEvenSize()
+    {
+
+        ReduceAndAssertLists(
+            L( 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
+            6,
+            HG.One,
+            L( 1, 1, 1, 1, 2, 2, 1, 1, 1, 1 )
+        );
+
+    }
+    
+    [Test]
+    public void TestOddFaceGuaranteeingCenterCoverIsMarkedForFullRowOfOddSize()
+    {
+
+        ReduceAndAssertLists(
+            L( 1, 1, 1, 1, 1, 1, 1, 1, 1 ),
+            7,
+            HG.One,
+            L( 1, 1, 2, 2, 2, 2, 2, 1, 1 )
+        );
+
+    }
+    
+    [Test]
+    public void TestEvenFaceGuaranteeingCenterCoverIsMarkedForFullRowOfOddSize()
+    {
+
+        ReduceAndAssertLists(
+            L( 1, 1, 1 ),
+            2,
+            HG.One,
+            L( 1, 2, 1 )
+        );
+        
+        ReduceAndAssertLists(
+            L( 1, 1, 1, 1, 1, 1, 1, 1, 1),
+            8,
+            HG.One,
+            L( 1, 2, 2, 2, 2, 2, 2, 2, 1 )
+        );
+
+    }
+
 }
