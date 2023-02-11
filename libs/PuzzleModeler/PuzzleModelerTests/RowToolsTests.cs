@@ -20,6 +20,11 @@ public class RowToolsTests
     {
         return new List<int>(values);
     }
+
+    private static List<int> S(int value, int length)
+    {
+        return Enumerable.Repeat(value, length).ToList();
+    }
     
     [SetUp]
     public void Setup()
@@ -169,4 +174,215 @@ public class RowToolsTests
 
     }
 
+    [Test]
+    public void TestReturnsFullUnmarkedRowAsOneSegment()
+    {
+
+        var input = L(1, 1, 1, 1, 1);
+        var result = RowTools.GetRowSegments(input);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Length.EqualTo(1));
+            Assert.That(result[0], Is.EquivalentTo(input));
+        });
+        
+    }
+    
+    [Test]
+    public void TestReturnsFullPartiallyMarkedRowAsOneSegment()
+    {
+
+        var input = L(1, 2, 1, 2, 1);
+        var result = RowTools.GetRowSegments(input);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Length.EqualTo(1));
+            Assert.That(result[0], Is.EquivalentTo(input));
+        });
+        
+    }
+    
+    [Test]
+    public void TestReturnsEmptyRowAsOneSegment()
+    {
+
+        var input = L(0, 0, 0, 0, 0);
+        var result = RowTools.GetRowSegments(input);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Length.EqualTo(1));
+            Assert.That(result[0], Is.EquivalentTo(input));
+        });
+        
+    }
+
+    [Test]
+    public void TestReturnsTwoSegmentsWhenLeftIsEmptySingle()
+    {
+        
+        var input = L(0, 2, 1, 2, 1);
+        var result = RowTools.GetRowSegments(input);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Length.EqualTo(2));
+            Assert.That(result[0], Is.EquivalentTo(L(0)));
+            Assert.That(result[1], Is.EquivalentTo(L(2, 1, 2, 1)));
+        });
+        
+    }
+    
+    [Test]
+    public void TestReturnsTwoSegmentsWhenRightIsEmptySingle()
+    {
+        
+        var input = L(2, 1, 2, 1, 0);
+        var result = RowTools.GetRowSegments(input);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Length.EqualTo(2));
+            Assert.That(result[0], Is.EquivalentTo(L(2, 1, 2, 1)));
+            Assert.That(result[1], Is.EquivalentTo(L(0)));
+        });
+        
+    }
+    
+    [Test]
+    public void TestReturnsTwoSegmentsWhenLeftIsEmptyMultiple()
+    {
+        
+        var input = L(0, 0, 0, 0, 1);
+        var result = RowTools.GetRowSegments(input);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Length.EqualTo(2));
+            Assert.That(result[0], Is.EquivalentTo(S(0, 4)));
+            Assert.That(result[1], Is.EquivalentTo(L(1)));
+        });
+        
+    }
+    
+    [Test]
+    public void TestReturnsTwoSegmentsWhenRightIsEmptyMultiple()
+    {
+        
+        var input = L(1, 0, 0, 0, 0);
+        var result = RowTools.GetRowSegments(input);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Length.EqualTo(2));
+            Assert.That(result[0], Is.EquivalentTo(L(1)));
+            Assert.That(result[1], Is.EquivalentTo(S(0, 4)));
+        });
+        
+    }
+    
+    [Test]
+    public void TestReturnsThreeSegmentsWhenCenterIsEmptySingle()
+    {
+        
+        var input = L(1, 2, 0, 1, 2);
+        var result = RowTools.GetRowSegments(input);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Length.EqualTo(3));
+            Assert.That(result[0], Is.EquivalentTo(L(1, 2)));
+            Assert.That(result[1], Is.EquivalentTo(L(0)));
+            Assert.That(result[2], Is.EquivalentTo(L(1, 2)));
+        });
+        
+    }
+    
+    [Test]
+    public void TestReturnsThreeSegmentsWhenCenterIsEmptyMultiple()
+    {
+        
+        var input = L(1, 0, 0, 0, 2);
+        var result = RowTools.GetRowSegments(input);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Length.EqualTo(3));
+            Assert.That(result[0], Is.EquivalentTo(L(1)));
+            Assert.That(result[1], Is.EquivalentTo(L(0, 0, 0)));
+            Assert.That(result[2], Is.EquivalentTo(L(2)));
+        });
+        
+    }
+    
+    [Test]
+    public void TestReturnsThreeSegmentsWhenSidesAreEmpty()
+    {
+        
+        var input = L(0, 1, 2, 0, 0);
+        var result = RowTools.GetRowSegments(input);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Length.EqualTo(3));
+            Assert.That(result[0], Is.EquivalentTo(L(0)));
+            Assert.That(result[1], Is.EquivalentTo(L(1, 2)));
+            Assert.That(result[2], Is.EquivalentTo(L(0, 0)));
+        });
+        
+    }
+    
+    [Test]
+    public void TestReturnsAllSegmentsFromListOfSingles()
+    {
+        
+        var input = L(0, 1, 0, 2, 0);
+        var result = RowTools.GetRowSegments(input);
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(result, Has.Length.EqualTo(5));
+            Assert.That(result[0], Is.EquivalentTo(L(0)));
+            Assert.That(result[1], Is.EquivalentTo(L(1)));
+            Assert.That(result[2], Is.EquivalentTo(L(0)));
+            Assert.That(result[3], Is.EquivalentTo(L(2)));
+            Assert.That(result[4], Is.EquivalentTo(L(0)));
+        });
+        
+    }
+
+    [Test]
+    public void TestAssembleSingleSegment()
+    {
+        
+        var input = new[]
+        {
+            L(0, 0, 0)
+        };
+        
+        var result = input.AssembleSegments();
+        Assert.That(result, Is.EquivalentTo(L(0, 0, 0)));
+        
+    }
+
+    [Test]
+    public void TestAssembleMultipleSegments()
+    {
+        
+        var input = new[]
+        {
+            L(0),
+            L(1),
+            L(0),
+            L(2),
+            L(0)
+        };
+
+        var result = input.AssembleSegments();
+        Assert.That(result, Is.EquivalentTo(L(0, 1, 0, 2, 0)));
+
+    }
+    
 }

@@ -1,4 +1,6 @@
-﻿namespace PuzzleModeler;
+﻿using System.Runtime.CompilerServices;
+
+namespace PuzzleModeler;
 
 public enum HintGrouping
 {
@@ -58,6 +60,32 @@ public static class RowTools
             return true;
         }
         return false;
+    }
+
+    private static bool IsEmpty(this int cell) => cell == 0;
+
+    public static List<int>[] GetRowSegments(this List<int> row)
+    {
+
+        var section = 0;
+        return row.Select( (item,index) =>  new {
+            item,
+            index = index == 0 || row[index-1].IsEmpty() == item.IsEmpty() ? section : ++section
+        })
+        .GroupBy(x => x.index, x => x.item)
+        .Select(Enumerable.ToList)
+        .ToArray();
+
+    }
+
+    public static List<int> AssembleSegments(this List<int>[] segments)
+    {
+
+        return segments
+            .Cast<IEnumerable<int>>()
+            .Aggregate(Enumerable.Concat)
+            .ToList();
+        
     }
     
 }
