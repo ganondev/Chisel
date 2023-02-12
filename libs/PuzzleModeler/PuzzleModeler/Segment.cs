@@ -4,8 +4,14 @@ namespace PuzzleModeler;
 
 internal static class SegmentExtension
 {
-    public static bool IsEmptySegment(this Segment segment)
+    internal static bool IsEmptySegment(this Segment segment)
     {
         return segment.All(i => i == 0);
     }
+
+    internal static int NumberMarkedInSegment(this Segment segment)
+    {
+        return segment.Count(i => i == 2);
+    }
+    
 }

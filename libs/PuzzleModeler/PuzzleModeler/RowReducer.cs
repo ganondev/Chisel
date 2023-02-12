@@ -10,8 +10,17 @@ public abstract class RowReducer
             where !segment.IsEmptySegment()
             select segment.Count).Sum();
 
-    private bool IsComplete =>
+    private protected int RowMarked =>
+        (from segment in Segments
+            where !segment.IsEmptySegment()
+            select segment.NumberMarkedInSegment()).Sum();
+
+    private bool IsCompleteByRemaining =>
         Face == RowRemaining;
+
+    private bool IsCompleteByMarking =>
+        Face == RowMarked;
+        
 
     internal RowReducer(int face, Segment[] segments)
     {
@@ -29,13 +38,25 @@ public abstract class RowReducer
     internal virtual bool Reduce(in Segment[] segments)
     {
 
-        if (IsComplete)
+        if (IsCompleteByRemaining)
         {
             for (var index = 0; index < segments.Length; index++)
             {
                 if (!segments[index].IsEmptySegment())
                     segments[index] = 
                         (from i in segments[index] select i == 0 ? 0 : 2)
+                        .ToList();
+            }
+            return true;
+        }
+
+        if (IsCompleteByMarking)
+        {
+            for (var index = 0; index < segments.Length; index++)
+            {
+                if (!segments[index].IsEmptySegment())
+                    segments[index] = 
+                        (from i in segments[index] select i == 2 ? 2 : 0)
                         .ToList();
             }
             return true;
