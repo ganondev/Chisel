@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-namespace PuzzleModeler;
+﻿namespace PuzzleModeler;
 
 public enum HintGrouping
 {
@@ -16,50 +14,24 @@ public static class RowTools
     {
 		
         var (face, grouping) = hint;
-        IEnumerable<int>? updated = null;
-		
-        if (face == 0)
+
+        var segments = GetRowSegments(row);
+        // var reducer = new SingleRowReducer(face, segments);
+        RowReducer reducer = grouping switch
         {
-            updated = from i in row select 0;
-            goto done;
-        }
-
-        var rowSize = row.Count(i => i > 0);
-        if (face == rowSize)
+            HintGrouping.One => new SingleRowReducer(face, segments),
+            HintGrouping.Two => new SplitRowReducer(face, segments),
+            HintGrouping.ThreePlus => new SegmentedRowReducer(face, segments),
+            _ => throw new ArgumentException($"Bad grouping {grouping}", nameof(grouping))
+        };
+        if (reducer.RunReduction(out var update))
         {
-            // mark any remaining cells
-            updated = from i in row select i == 0 ? 0 : 2;
-            goto done;
-        }
-
-        if (grouping == HintGrouping.One)
-        {
-
-            if (face > rowSize / 2)
-            {
-                var margins = rowSize - face;
-
-                var segmentSize = rowSize - margins * 2;
-                var segment = row.Skip(margins).Take(segmentSize);
-                if (segment.Any(i => i == 1))
-                {
-                    segment = Enumerable.Repeat(2, segmentSize);
-                    updated = row.Take(margins).Concat(segment).Concat(row.Skip(margins + segmentSize));
-                    goto done;
-                }
-
-            }
-			
-        }
-        
-        done:
-
-        if (updated != null)
-        {
-            row = updated.ToList();
+            row = AssembleSegments(update);
             return true;
         }
+
         return false;
+        
     }
 
     private static bool IsEmpty(this int cell) => cell == 0;

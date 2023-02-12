@@ -16,16 +16,6 @@ public class RowToolsTests
         
     }
 
-    private static List<int> L(params int[] values)
-    {
-        return new List<int>(values);
-    }
-
-    private static List<int> S(int value, int length)
-    {
-        return Enumerable.Repeat(value, length).ToList();
-    }
-    
     [SetUp]
     public void Setup()
     {
