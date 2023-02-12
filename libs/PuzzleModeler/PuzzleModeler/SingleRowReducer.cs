@@ -56,6 +56,12 @@ public class SingleRowReducer : RowReducer
     private bool ApplyReduction(ref IEnumerable<int> segment)
     {
 
+        if (Face > segment.Count())
+        {
+            segment = from i in segment select 0;
+            return true;
+        }
+
         if (Face > RowRemaining / 2)
         {
             var margins = RowRemaining - Face;
