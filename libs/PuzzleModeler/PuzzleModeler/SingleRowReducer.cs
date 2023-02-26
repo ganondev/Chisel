@@ -72,7 +72,7 @@ public class SingleRowReducer : RowReducer
             return true;
         }
 
-        // face is larger than segment so it's not applicable
+        // face guarantees cover of the center of the segment
         // 3: .#### -> .#00#
         if (Face > RowRemaining / 2)
         {
@@ -94,6 +94,45 @@ public class SingleRowReducer : RowReducer
                 return true;
             }
 
+        }
+        
+        // TODO could possibly short circuit a false here if there are no existing marked cells in segment
+        // 3: ####### -> ####### i.e. no change
+        
+        // face extends existing marking from left
+        // 3: .#0#### -> .#00###
+        // 3: .0##### -> .000###
+        var leftBit = segment.Take(Face);
+        if (leftBit.Any(i => i == 2))
+        {
+            var leftGap = leftBit.TakeWhile(i => i == 1);
+            var toMark = Face - leftGap.Count();
+            var adjusted = leftGap.Concat(Enumerable.Repeat(2, toMark));
+            if (!leftBit.SequenceEqual(adjusted))
+            {
+                segment = adjusted.Concat(segment.Skip(Face));
+                return true;
+            }
+            // TODO can short circuit marking from the edge
+            // 3: .0##### -> .000...
+        }
+        
+        // face extends existing marking from right
+        // 3: .####0# -> .###00#
+        // 3: .#####0 -> .###000
+        var leftSkip = segment.Count() - Face;
+        var rightBit = segment.Skip(leftSkip).Take(Face); 
+        if (rightBit.Any(i => i == 2))
+        {
+            var rightGap = rightBit.Reverse() .TakeWhile(i => i == 1);
+            var toMark = Face - rightGap.Count();
+            var adjusted = Enumerable.Repeat(2, toMark).Concat(rightGap);
+            if (!rightBit.SequenceEqual(adjusted))
+            {
+                segment = segment.Take(leftSkip).Concat(adjusted);
+                return true;
+            }
+            // TODO can short circuit marking from the edge
         }
 
         return false;
