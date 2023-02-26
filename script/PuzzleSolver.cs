@@ -289,7 +289,7 @@ public class PuzzleSolver : StaticBody
 	private HashSet<(int, int, int)> solvedRows = new HashSet<(int, int, int)>();
 	private int currentLineHighlight = 0;
 	private int scanClock = 0;
-	private int scanCycle = 5;
+	private int scanCycle = 2;
 	private bool continueScan = false;
 	private Axis axis = Axis.X;
 

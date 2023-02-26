@@ -50,7 +50,7 @@ public static class RowTools
 
     }
 
-    public static List<int> AssembleSegments(this List<int>[] segments)
+    public static List<int> AssembleSegments(this Segment[] segments)
     {
 
         return segments

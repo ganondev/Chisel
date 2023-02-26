@@ -56,12 +56,24 @@ public class SingleRowReducer : RowReducer
     private bool ApplyReduction(ref IEnumerable<int> segment)
     {
 
+        // face is larger than segment so it's not applicable
+        // 5: .#### -> .....
         if (Face > segment.Count())
         {
             segment = from i in segment select 0;
             return true;
         }
 
+        // other segment in row is already marked, this disqualifying this one
+        // 2: #0#.### -> #0#....
+        if (RowMarked > 0 && segment.ToList().NumberMarkedInSegment() == 0)
+        {
+            segment = from i in segment select 0;
+            return true;
+        }
+
+        // face is larger than segment so it's not applicable
+        // 3: .#### -> .#00#
         if (Face > RowRemaining / 2)
         {
             var margins = RowRemaining - Face;
@@ -73,7 +85,12 @@ public class SingleRowReducer : RowReducer
             if (centerSegment.Any(i => i == 1))
             {
                 centerSegment = Enumerable.Repeat(2, centerSize);
-                segment = segment.Take(margins).Concat(centerSegment).Concat(segment.Skip(margins + centerSize));
+                segment = segment
+                    .Take(margins)
+                    .Concat(centerSegment)
+                    .Concat(
+                        segment.Skip(margins + centerSize)
+                    );
                 return true;
             }
 
