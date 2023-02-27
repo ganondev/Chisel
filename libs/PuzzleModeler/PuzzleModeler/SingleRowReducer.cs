@@ -99,6 +99,20 @@ public class SingleRowReducer : RowReducer
         // TODO could possibly short circuit a false here if there are no existing marked cells in segment
         // 3: ####### -> ####### i.e. no change
         
+        // separate segments are bridged together
+        // 4: .###0#0### -> .###000###
+        if (segment.ToList().FindSplitMarkings(out var indices))
+        {
+            var set = indices.Take(2).ToList();
+            var left = set[0];
+            var right = set[1];
+            var pre = segment.Take(left);
+            var middle = Enumerable.Repeat(2, right - left);
+            var post = segment.Skip(right);
+            segment = pre.Concat(middle).Concat(post);
+            return true;
+        }
+
         // face extends existing marking from left
         // 3: .#0#### -> .#00###
         // 3: .0##### -> .000###
