@@ -148,6 +148,32 @@ public class SingleRowReducer : RowReducer
             }
             // TODO can short circuit marking from the edge
         }
+        
+        // cells too far from an existing marking are removed
+        // 3: ###00# -> ..#00#
+        // 3: #00### -> #00#..
+        var countMarked = segment.Count(i => i == 2);
+        if (countMarked > 0) // will be false if none are marked
+        {
+            var ambiguous = Face - countMarked;
+            var unmarkedLeft = segment.TakeWhile(i => i == 1).Count();
+            if (unmarkedLeft > ambiguous)
+            {
+                var updated = Enumerable.Repeat(0, unmarkedLeft - ambiguous)
+                    .Concat(Enumerable.Repeat(1, ambiguous));
+                segment = updated.Concat(segment.Skip(updated.Count()));
+                return true;
+            }
+            var unmarkedRight = segment.Reverse().TakeWhile(i => i == 1).Count();
+            if (unmarkedRight > ambiguous)
+            {
+                var updated = Enumerable.Repeat(1, ambiguous)
+                    .Concat(Enumerable.Repeat(0, unmarkedRight - ambiguous));
+                segment = segment.Take(segment.Count() - updated.Count()).Concat(updated);
+                return true;
+            }
+        }
+        
 
         return false;
     }

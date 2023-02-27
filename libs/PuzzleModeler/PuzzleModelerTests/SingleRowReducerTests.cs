@@ -184,5 +184,39 @@ public class SingleRowReducerTests
         });
         
     }
+
+    [Test]
+    public void TestUnmarkedTooFarFromLeftAreRemoved()
+    {
+        
+        var reducer = new SingleRowReducer(3, new []
+        {
+            L(1, 1, 1, 2, 2, 1)
+        });
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(reducer.RunReduction(out var result), Is.True);
+            Assert.That(result[0], Is.EquivalentTo(L(0, 0, 1, 2, 2, 1)));
+        });
+        
+    }
+    
+    [Test]
+    public void TestUnmarkedTooFarFromRightAreRemoved()
+    {
+        
+        var reducer = new SingleRowReducer(3, new []
+        {
+            L(1, 2, 2, 1, 1, 1)
+        });
+        
+        Assert.Multiple(() =>
+        {
+            Assert.That(reducer.RunReduction(out var result), Is.True);
+            Assert.That(result[0], Is.EquivalentTo(L(1, 2, 2, 1, 0, 0)));
+        });
+        
+    }
     
 }
